@@ -1,0 +1,10 @@
+:root {
+  --primary: #8B0000;      /* Deep Maroon */
+  --secondary: #FFD700;    /* Gold */
+  --bg: #fff8e1;           /* Temple Cream */
+}
+
+body {
+  background-color: var(--bg);
+  color: #3e2723;
+}
