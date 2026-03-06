@@ -1,10 +1,87 @@
-:root {
-  --primary: #8B0000;      /* Deep Maroon */
-  --secondary: #FFD700;    /* Gold */
-  --bg: #fff8e1;           /* Temple Cream */
+@import "tailwindcss";
+
+@theme {
+  /* Updated Palette: Saffron, Orange, Yellow, Maroon */
+  --color-primary: #ea580c;       /* Spiritual Orange (Saffron-tinted) */
+  --color-primary-hover: #c2410c; /* Deep Saffron */
+  --color-accent: #facc15;        /* Sacred Yellow (Turmeric) */
+  --color-maroon: #7f1d1d;       /* Vedic Maroon (Sandalwood/Kumkum) */
+  --color-maroon-light: #991b1b;
+  --color-creme: #fffaf0;        /* Ivory base */
+  
+  --font-serif: "Georgia", serif;
+  --font-sans: "Inter", sans-serif;
 }
 
-body {
-  background-color: var(--bg);
-  color: #3e2723;
+@layer base {
+  body {
+    @apply text-slate-900 antialiased bg-creme;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+    font-family: var(--font-serif);
+    color: var(--color-maroon); /* Titles look very traditional in Maroon */
+  }
+}
+
+@layer components {
+  /* THE DIVINE GLASS EFFECT */
+  .divine-glass {
+    @apply bg-white/80 backdrop-blur-xl border border-orange-100/50;
+    /* Changed shadow to use a warm Maroon/Saffron glow */
+    @apply shadow-[0_8px_32px_0_rgba(127,29,29,0.04)]; 
+  }
+
+  /* THE EVENT CARD SHADOW */
+  .event-card-glass {
+    @apply bg-white/95 backdrop-blur-sm border border-orange-50;
+    @apply rounded-2xl transition-all duration-300;
+    @apply shadow-[0_4px_20px_rgba(234,88,12,0.06)];
+  }
+
+  /* EVENT CARD HOVER EFFECT */
+  .event-card-glass:hover {
+    @apply shadow-[0_12px_40px_rgba(127,29,29,0.12)];
+    @apply border-accent; /* Turmeric Yellow border on hover */
+    @apply -translate-y-1;
+  }
+
+  /* Standard Button - Now using Saffron & Maroon */
+  .btn-primary {
+    @apply bg-primary text-white px-8 py-3 rounded-full font-bold text-sm tracking-wider uppercase
+           transition-all duration-300 hover:bg-maroon shadow-md hover:shadow-orange-200/50;
+  }
+
+  .nav-link {
+    @apply text-xs font-bold uppercase tracking-[0.15em] transition-colors duration-200 hover:text-primary;
+  }
+}
+
+@layer base {
+  /* Updated Scrollbar: Maroon thumb with Saffron hover */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #fffaf0; 
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #bf8989; /* Maroon Thumb */
+    border-radius: 20px;
+    border: 2px solid #fffaf0; 
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ea580c; /* Saffron on hover */
+  }
+
+  /* Firefox Support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #928a6b #fffaf0;
+  }
 }

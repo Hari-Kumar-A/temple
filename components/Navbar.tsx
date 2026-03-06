@@ -1,44 +1,134 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
+const mainLinks = [
+  { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
+  { name: "Events", href: "/events" },
+  { name: "Donate", href: "/donate" },
+];
+
+const allLinks = [
+  { name: "Temple Staff & Committee", href: "/staff" },
+  { name: "History", href: "/history" },
+  { name: "Timings", href: "/timings" },
+  { name: "Pooja Services", href: "/services" },
+  { name: "Special Pooja Calendar 2026", href: "/calendar" },
+  { name: "Balavikas Classes [TBD]", href: "/classes" },
+  { name: "Articles [TBD]", href: "/articles" },
+  { name: "Gallery [TBD]", href: "/gallery" },
+  { name: "Contact", href: "/contact" },
+];
+
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isOpen &&
+        navRef.current &&
+        !navRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
 
   return (
-    <nav className="bg-[var(--primary)] text-white px-8 py-4 flex justify-between">
-      <h1 className="font-bold text-xl">Sri Ganapathi</h1>
+    <header
+      ref={navRef}
+      className={`sticky top-0 z-50 transition-all duration-300 border-b ${
+        scrolled
+          ? "bg-white/70 backdrop-blur-md border-gray-200/50 shadow-sm"
+          : "bg-white border-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center relative z-[60]">
+        {/* Logo */}
+        <Link href="/" className="flex flex-col group">
+          <span className="text-xl font-serif font-bold text-primary tracking-tight group-hover:text-primary/80 transition-colors">
+            NIT Trichy
+          </span>
+          <span className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">
+            Sri Vidya Ganapathi Temple
+          </span>
+        </Link>
 
-      <div className="relative">
-        <button onClick={() => setOpen(!open)}>Menu ▼</button>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex gap-8">
+          {mainLinks.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="relative text-sm font-semibold text-gray-600 hover:text-primary transition-colors group py-2"
+            >
+              {item.name}
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-400 ease-out origin-center" />
+            </Link>
+          ))}
+        </nav>
 
-        {open && (
-          <div className="absolute right-0 mt-2 bg-white text-black shadow rounded w-60">
-            {[
-              "About",
-              "Temple Staff & Committee",
-              "History",
-              "Timings",
-              "Poojari Services",
-              "Special Pooja Calendar 2026",
-              "Activities and Events",
-              "Balavihar Classes",
-              "Articles",
-              "Gallery",
-              "Donate",
-              "Contact",
-            ].map((item) => (
-              <Link
-                key={item}
-                href="/"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                {item}
-              </Link>
-            ))}
+        {/* Hamburger Icon */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-gray-600 hover:text-primary transition-colors focus:outline-none cursor-pointer group"
+          aria-label="Toggle Menu"
+        >
+          <div className="w-6 h-5 flex flex-col justify-between">
+            <span
+              className={`h-0.5 w-full bg-current transition-all duration-300 ${isOpen ? "rotate-45 translate-y-2" : ""}`}
+            />
+            <span
+              className={`h-0.5 w-full bg-current transition-all duration-300 ${isOpen ? "opacity-0" : ""}`}
+            />
+            <span
+              className={`h-0.5 w-full bg-current transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-2" : ""}`}
+            />
           </div>
-        )}
+        </button>
       </div>
-    </nav>
+
+      {/* Dropdown Menu - SOLID WHITE (No Glass Effect) */}
+      <div
+        className={`absolute top-[80px] right-0 w-full md:max-w-xs bg-white border-l border-b border-gray-100 shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top ${
+          isOpen
+            ? "opacity-100 translate-y-0 scale-y-100 pointer-events-auto"
+            : "opacity-0 -translate-y-4 scale-y-95 pointer-events-none"
+        }`}
+      >
+        <nav className="flex flex-col p-3 gap-1">
+          {allLinks.map((item, index) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              style={{ transitionDelay: isOpen ? `${index * 20}ms` : "0ms" }}
+              className={`text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 px-4 py-3.5 rounded-2xl transition-all duration-300 ${
+                isOpen ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+
+          <div className="mt-2 h-px w-full bg-gray-100" />
+        </nav>
+      </div>
+    </header>
   );
 }
