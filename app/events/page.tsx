@@ -1,106 +1,69 @@
 import { client } from "@/sanity/lib/client";
+import { notFound } from "next/navigation";
+import Link from "next/link";
 
-type Event = {
-  _id: string;
-  title: string;
-  description: string;
-  date: string;
-  slug?: { current: string };
+type Props = {
+  params: { slug: string };
 };
 
-const QUERY = `*[_type == "event"] | order(date asc)`;
+// 1. THIS FIXES THE BUILD ERROR
+// It fetches all available slugs so Next.js can pre-render the pages
+export async function generateStaticParams() {
+  const query = `*[_type == "event"]{ "slug": slug.current }`;
+  const events = await client.fetch(query);
 
-export default async function EventsPage() {
-  // 1. Safe fetch with fallback
-  let events: Event[] = [];
-  try {
-    events = await client.fetch(QUERY);
-  } catch (error) {
-    console.error("Sanity fetch error:", error);
+  return events.map((event: { slug: string }) => ({
+    slug: event.slug,
+  }));
+}
+
+export default async function EventDetail({ params }: Props) {
+  // 2. Pass the params.slug explicitly to the query
+  const event = await client.fetch(
+    `*[_type == "event" && slug.current == $slug][0]`,
+    { slug: params.slug }, // The $slug in your query maps to this object
+  );
+
+  // 3. Handle 404 gracefully
+  if (!event) {
+    return notFound();
   }
 
   return (
-    <main className="relative min-h-screen pt-16 pb-20 bg-creme overflow-hidden">
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[80px] z-[-1]" />
-      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-accent/20 rounded-full blur-[80px] z-[-1]" />
+    <main className="relative min-h-screen pt-24 pb-20 bg-creme">
+      <div className="max-w-3xl mx-auto px-6">
+        <Link
+          href="/events"
+          className="text-primary text-xs font-bold uppercase tracking-widest hover:text-maroon transition-all flex items-center gap-2 mb-12"
+        >
+          <span>←</span> Back to Events
+        </Link>
 
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="max-w-2xl mb-12 text-center md:text-left">
-          <h2 className="text-[10px] uppercase tracking-[0.5em] font-bold text-primary mb-2">
-            Sacred Gathering
-          </h2>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-maroon leading-tight">
-            Temple Events
-          </h1>
-          <p className="mt-4 text-gray-600 text-sm leading-relaxed max-w-lg">
-            Join our community in devotion. From monthly Pradosham rituals to
-            annual Veda Parayanam festivals, find our upcoming spiritual
-            schedule.
+        <article className="divine-glass p-8 md:p-12 rounded-[3rem] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[5rem] -z-1" />
+
+          <p className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-4">
+            Event Details
           </p>
-        </div>
 
-        {events.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {events.map((event) => {
-              const eventDate = new Date(event.date);
-              const day = eventDate.getDate();
-              const month = eventDate.toLocaleString("en-IN", {
-                month: "short",
-              });
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-maroon mb-6 leading-tight">
+            {event.title}
+          </h1>
 
-              return (
-                <div
-                  key={event._id}
-                  className="divine-glass relative p-6 md:p-8 rounded-[2rem] transition-all duration-500 flex flex-col min-h-[250px]"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex flex-col items-center justify-center bg-white w-14 h-14 rounded-xl shadow-sm border border-primary/10">
-                        <span className="text-primary font-bold text-lg leading-none">
-                          {day}
-                        </span>
-                        <span className="text-[9px] uppercase font-bold text-gray-400">
-                          {month}
-                        </span>
-                      </div>
-                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] py-0.5 px-2 bg-primary/10 text-primary rounded-full">
-                        Upcoming
-                      </span>
-                    </div>
-
-                    <h3 className="text-xl md:text-2xl font-serif font-bold text-maroon mb-3">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed text-xs md:text-sm line-clamp-3 mb-6">
-                      {event.description}
-                    </p>
-
-                    {/* Added Link to Detail Page */}
-                    {event.slug?.current && (
-                      <a
-                        href={`/events/${event.slug.current}`}
-                        className="mt-auto text-primary text-[10px] font-bold uppercase tracking-widest hover:text-maroon transition-colors flex items-center gap-2"
-                      >
-                        View Details <span>→</span>
-                      </a>
-                    )}
-                  </div>
-                  <div className="absolute bottom-2 right-2 w-16 h-16 text-primary/5 pointer-events-none">
-                    <svg viewBox="0 0 100 100" fill="currentColor">
-                      <path d="M50 0 L100 50 L50 100 L0 50 Z" />
-                    </svg>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="flex items-center gap-4 mb-10 pb-6 border-b border-orange-100">
+            <div className="bg-primary/10 text-primary px-4 py-2 rounded-lg font-bold text-sm">
+              {new Date(event.date).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-20 divine-glass rounded-3xl">
-            <p className="text-maroon italic">
-              No upcoming events at this time.
-            </p>
-          </div>
-        )}
+
+          <p className="text-gray-700 leading-relaxed text-lg italic font-serif">
+            {event.description}
+          </p>
+        </article>
       </div>
     </main>
   );
