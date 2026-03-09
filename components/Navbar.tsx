@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
- 
-
 const allLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -16,7 +14,6 @@ const allLinks = [
   { name: "Pooja Services", href: "/services" },
   { name: "Special Pooja Calendar 2026", href: "/calendar" },
   { name: "Balavikas Classes [TBD]", href: "/classes" },
-
   { name: "Gallery [TBD]", href: "/gallery" },
   { name: "Contact", href: "/contact" },
 ];
@@ -68,8 +65,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        
-
         {/* Hamburger Icon */}
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -90,15 +85,18 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Dropdown Menu - SOLID WHITE (No Glass Effect) */}
+      {/* Dropdown Menu */}
       <div
-        className={`absolute top-[80px] right-0 w-full md:max-w-xs bg-white border-l border-b border-gray-100 shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top ${
-          isOpen
-            ? "opacity-100 translate-y-0 scale-y-100 pointer-events-auto"
-            : "opacity-0 -translate-y-4 scale-y-95 pointer-events-none"
-        }`}
+        className={`absolute top-[80px] right-0 w-full md:max-w-xs bg-white border-l border-b border-gray-100 shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top 
+          /* CRITICAL FIXES BELOW */
+          max-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar
+          ${
+            isOpen
+              ? "opacity-100 translate-y-0 scale-y-100 pointer-events-auto"
+              : "opacity-0 -translate-y-4 scale-y-95 pointer-events-none"
+          }`}
       >
-        <nav className="flex flex-col p-3 gap-0.75">
+        <nav className="flex flex-col p-3 gap-1">
           {allLinks.map((item, index) => (
             <Link
               key={item.name}
@@ -113,9 +111,26 @@ export default function Navbar() {
             </Link>
           ))}
 
-          <div className="mt-2 h-px w-full bg-gray-100" />
+          <div className="mt-2 mb-4 h-px w-full bg-gray-100 md:hidden" />
         </nav>
       </div>
+
+      {/* Inline Style for the scrollbar to keep it sleek */}
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e5e7eb;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #d1d5db;
+        }
+      `}</style>
     </header>
   );
 }
