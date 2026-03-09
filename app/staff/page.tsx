@@ -64,7 +64,7 @@ export default function StaffPage() {
             Our Guardians
           </h2>
           <h1 className="text-5xl md:text-6xl font-serif font-bold text-gray-900 tracking-tighter">
-            Temple Staff & <br />
+            Temple<br />
             <span className="italic text-primary/80 font-medium text-4xl md:text-5xl">
               Committee Members
             </span>

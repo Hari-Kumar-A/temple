@@ -2,7 +2,7 @@ const timelineEvents = [
   {
     year: "1968",
     title: "Founding & First Installation",
-    desc: "Following a campus mishap, the first batch of RECT students, led by Mr. GV Raman and future Capt. Srinivasan, proposed the installation of Ganapathi. With clearance from the Principal, a Ganesha idol was purchased for ₹300. Assisted by Asst. Registrar Mr. Nagashesaiah, a platform was built near the garage, and the Ucchi Pillaiyar Koil Gurukkal performed the first Sandana Kappu Alankaram.",
+    desc: "Following a collective initiative to enhance campus well-being, the first batch of RECT students, led by Mr. GV Raman and future Capt. Srinivasan, proposed the installation of Ganapathi. With clearance from the Principal, a Ganesha idol was purchased for ₹300. Assisted by Asst. Registrar Mr. Nagashesaiah, a platform was built near the garage, and the Ucchi Pillaiyar Koil Gurukkal performed the first Sandana Kappu Alankaram.",
   },
   {
     year: "1970",

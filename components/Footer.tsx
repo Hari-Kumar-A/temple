@@ -12,7 +12,7 @@ export default function Footer() {
           <h3 className="text-white text-2xl font-serif font-bold tracking-tight">
             NIT Trichy{" "}
             <span className="text-orange-500/80 italic font-medium">
-              Temple 
+              Temple
             </span>
           </h3>
           <p className="text-sm leading-relaxed font-light max-w-xs">
@@ -45,10 +45,18 @@ export default function Footer() {
             </li>
             <li>
               <Link
-                href="/donate"
+                href="/services"
                 className="hover:text-orange-400 transition-colors duration-300"
               >
                 Donations
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/gallery"
+                className="hover:text-orange-400 transition-colors duration-300"
+              >
+                Gallery
               </Link>
             </li>
           </ul>

@@ -3,21 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
-const mainLinks = [
+ 
+
+const allLinks = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
   { name: "Events", href: "/events" },
-  { name: "Donate", href: "/donate" },
-];
-
-const allLinks = [
-  { name: "Temple Staff & Committee", href: "/staff" },
+  { name: "Temple Committee", href: "/staff" },
   { name: "History", href: "/history" },
+  { name: "Articles", href: "/articles" },
   { name: "Timings", href: "/timings" },
   { name: "Pooja Services", href: "/services" },
   { name: "Special Pooja Calendar 2026", href: "/calendar" },
   { name: "Balavikas Classes [TBD]", href: "/classes" },
-  { name: "Articles [TBD]", href: "/articles" },
+
   { name: "Gallery [TBD]", href: "/gallery" },
   { name: "Contact", href: "/contact" },
 ];
@@ -69,19 +68,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8">
-          {mainLinks.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="relative text-sm font-semibold text-gray-600 hover:text-primary transition-colors group py-2"
-            >
-              {item.name}
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-400 ease-out origin-center" />
-            </Link>
-          ))}
-        </nav>
+        
 
         {/* Hamburger Icon */}
         <button
@@ -111,7 +98,7 @@ export default function Navbar() {
             : "opacity-0 -translate-y-4 scale-y-95 pointer-events-none"
         }`}
       >
-        <nav className="flex flex-col p-3 gap-1">
+        <nav className="flex flex-col p-3 gap-0.75">
           {allLinks.map((item, index) => (
             <Link
               key={item.name}

@@ -1,143 +1,218 @@
-import Link from "next/link";
+"use client";
 
-const articles = [
-  {
-    id: "shukla-yajur-veda-modern-age",
-    category: "Vedic Wisdom",
-    title: "The Significance of Shukla Yajur Veda in the Modern Age",
-    excerpt:
-      "Exploring how ancient vibrations and rhythmic chanting continue to influence psychological well-being and cosmic harmony today.",
-    author: "Brahmasri K. Santhanam",
-    readTime: "8 min read",
-    date: "Feb 24, 2026",
-    accent: "border-amber-400",
-  },
-  {
-    id: "science-of-sandhyavandanam",
-    category: "Tradition",
-    title: "Understanding the Science Behind Sandhyavandanam",
-    excerpt:
-      "A deep dive into the physiological and spiritual benefits of the thrice-daily ritual performed at the junctions of time.",
-    author: "Sri R. Vasudevan",
-    readTime: "12 min read",
-    date: "Feb 10, 2026",
-    accent: "border-orange-400",
-  },
-  {
-    id: "gau-seva-connection",
-    category: "Lifestyle",
-    title: "Gau Seva: The Spiritual and Ecological Connection",
-    excerpt:
-      "Why the protection of indigenous cows is not just a religious duty, but a vital necessity for sustainable agriculture and health.",
-    author: "Trust Committee",
-    readTime: "6 min read",
-    date: "Jan 28, 2026",
-    accent: "border-yellow-400",
-  },
-];
+import React, { useState, useEffect } from "react";
+import { client } from "@/sanity/lib/client";
+import { PortableText } from "@portabletext/react";
+import imageUrlBuilder from "@sanity/image-url";
+
+const builder = imageUrlBuilder(client);
+function urlFor(source: any) {
+  return builder.image(source);
+}
+
+export type Article = {
+  _id: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  author: string;
+  role: string;
+  accent: string;
+  content: any;
+  image?: any;
+};
+
+const QUERY = `*[_type == "article"] | order(_createdAt desc) {
+  _id,
+  title,
+  category,
+  excerpt,
+  author,
+  role,
+  accent,
+  content,
+  image
+}`;
 
 export default function ArticlesPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const data = await client.fetch(QUERY);
+        setArticles(data);
+      } catch (error) {
+        console.error("Sanity fetch failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  // Handle Background Scroll Lock AND Footer Visibility
+  useEffect(() => {
+    const footer = document.querySelector("footer"); // Targets your global footer
+
+    if (selectedArticle) {
+      // 1. Lock scroll
+      document.body.style.overflow = "hidden";
+      // 2. Hide footer
+      if (footer) footer.style.display = "none";
+    } else {
+      // 1. Restore scroll
+      document.body.style.overflow = "unset";
+      // 2. Restore footer
+      if (footer) footer.style.display = "block";
+    }
+
+    // Cleanup to ensure footer is restored if component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+      if (footer) footer.style.display = "block";
+    };
+  }, [selectedArticle]);
+
+  const portableTextComponents = {
+    block: {
+      h2: ({ children }: any) => (
+        <h2 className="text-2xl font-serif font-bold text-slate-900 mt-8 mb-4">
+          {children}
+        </h2>
+      ),
+      normal: ({ children }: any) => (
+        <p className="mb-6 text-slate-700 leading-relaxed font-light italic md:not-italic">
+          {children}
+        </p>
+      ),
+      blockquote: ({ children }: any) => (
+        <blockquote className="text-xl leading-relaxed text-slate-700 font-light italic border-l-4 border-primary/30 bg-slate-50 p-6 rounded-r-2xl my-8 whitespace-pre-line">
+          {children}
+        </blockquote>
+      ),
+    },
+  };
+
   return (
-    <main className="relative min-h-screen pt-20 pb-24 bg-[#fffdfa]">
-      {/* Soft Ethereal Background Glow */}
+    <main className="relative min-h-screen pt-20 pb-24 bg-[#fffdfa] isolate">
+      {/* Aesthetic Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-primary/5 blur-[120px] rounded-full z-[-1]" />
 
       <div className="max-w-6xl mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-24">
+        <header className="text-center mb-24">
           <h2 className="text-xs uppercase tracking-[0.5em] font-bold text-primary mb-4">
             The Knowledge Center
           </h2>
           <h1 className="text-5xl md:text-7xl font-serif font-bold text-gray-900 tracking-tighter">
-            Vedic <span className="italic text-primary/80">Insights</span>
+            Articles &<span className="italic text-primary/80"> Blogs</span>
           </h1>
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <span className="h-px w-12 bg-accent"></span>
-            <p className="text-gray-500 font-medium tracking-wide">
-              Reflections on Dharma, Vedas, and Seva
-            </p>
-            <span className="h-px w-12 bg-accent"></span>
+        </header>
+
+        {loading ? (
+          <div className="text-center py-20 opacity-50 font-serif italic animate-pulse">
+            Gathering stories...
           </div>
-        </div>
-
-        {/* Articles List */}
-        <div className="grid gap-10">
-          {articles.map((post) => (
-            <Link
-              key={post.id}
-              href={`/articles/${post.id}`}
-              className={`group divine-glass block p-8 md:p-12 rounded-[3rem] border-l-8 ${post.accent} transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1`}
-            >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                    <span>{post.category}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
-                    <span className="text-gray-400">{post.date}</span>
-                  </div>
-
-                  <h3 className="text-2xl md:text-4xl font-serif font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 leading-tight">
-                    {post.title}
-                  </h3>
-
-                  <p className="text-gray-600 text-lg leading-relaxed max-w-3xl line-clamp-2">
-                    {post.excerpt}
-                  </p>
-
-                  {/* Metadata Row */}
-                  <div className="flex items-center gap-6 pt-6">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase text-gray-400 font-bold tracking-widest mb-1">
-                        Author
-                      </span>
-                      <span className="text-sm font-bold text-gray-800">
-                        {post.author}
-                      </span>
-                    </div>
-                    <div className="w-px h-8 bg-gray-200/50"></div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase text-gray-400 font-bold tracking-widest mb-1">
-                        Reading Time
-                      </span>
-                      <span className="text-sm font-bold text-gray-800">
-                        {post.readTime}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* The Functional Arrow Button */}
-                <div className="flex items-center justify-center pointer-events-none">
-                  <div className="w-16 h-16 rounded-full border border-accent flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-500 shadow-sm">
-                    <span className="text-2xl transform group-hover:translate-x-1 transition-transform">
-                      →
+        ) : (
+          <div className="grid gap-10">
+            {articles.map((post) => (
+              <div
+                key={post._id}
+                onClick={() => setSelectedArticle(post)}
+                className={`cursor-pointer group block p-8 md:p-12 rounded-[3rem] border-l-8 ${post.accent || "border-primary"} transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 bg-white shadow-sm border border-slate-100`}
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                  <div className="flex-1 space-y-4">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                      {post.category}
                     </span>
+                    <h3 className="text-2xl md:text-4xl font-serif font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-600 line-clamp-2 font-light italic md:not-italic">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                  <div className="w-16 h-16 rounded-full border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-45">
+                    <span className="text-2xl">→</span>
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Informational Footer (No Subscribe) */}
-        <div className="mt-24 p-12 divine-glass rounded-[4rem] text-center border-none relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="text-primary text-4xl mb-4 font-serif">ॐ</div>
-            <h4 className="text-2xl font-serif text-gray-800 mb-4 font-bold tracking-tight">
-              Accessing Ancient Wisdom
-            </h4>
-            <p className="text-gray-600 max-w-2xl mx-auto leading-relaxed italic">
-              Our digital library is a humble effort to document the profound
-              depth of our Vedic heritage. New insights are added regularly as
-              our Acharyas continue to transcribe oral traditions.
-            </p>
+            ))}
           </div>
-          {/* Subtle watermark background icon */}
-          <div className="absolute -bottom-10 -left-10 text-[12rem] text-primary/5 select-none font-serif">
-            📖
-          </div>
-        </div>
+        )}
       </div>
+
+      {/* Overlay Modal */}
+      {selectedArticle && (
+        <div className="fixed inset-0 z-[99999] flex justify-center items-start p-4 md:p-6 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-900/80 backdrop-blur-xl cursor-zoom-out"
+            onClick={() => setSelectedArticle(null)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white w-full max-w-6xl max-h-[85vh] mt-20 overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-8 py-5 border-b border-slate-50 bg-white sticky top-0 z-[100]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
+                {selectedArticle.category}
+              </p>
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all hover:rotate-90"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="overflow-y-auto p-8 md:p-16 flex-1 custom-scrollbar scroll-smooth bg-white">
+              <header className="mb-12">
+                <h2 className="text-4xl md:text-5xl font-serif font-bold text-slate-950 mb-8 leading-tight">
+                  {selectedArticle.title}
+                </h2>
+
+                {/* Author Info */}
+                <div className="flex items-center gap-4 py-8 border-y border-slate-100 mb-10">
+                  <div className="w-14 h-14 rounded-full bg-indigo-50 flex items-center justify-center font-serif text-indigo-600 font-bold text-xl border border-indigo-100">
+                    {selectedArticle.author.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-slate-900 leading-none mb-1">
+                      {selectedArticle.author}
+                    </p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wide font-medium">
+                      {selectedArticle.role}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Contained Image */}
+                {selectedArticle.image && (
+                  <div className="relative mb-12 rounded-3xl overflow-hidden shadow-sm border border-slate-100 bg-slate-50/50 flex justify-center items-center p-2">
+                    <img
+                      src={urlFor(selectedArticle.image).width(1600).url()}
+                      alt={selectedArticle.title}
+                      className="w-auto max-w-full h-auto max-h-[60vh] object-contain rounded-2xl"
+                    />
+                  </div>
+                )}
+              </header>
+
+              <article className="prose prose-slate prose-lg max-w-none">
+                <PortableText
+                  value={selectedArticle.content}
+                  components={portableTextComponents}
+                />
+              </article>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
